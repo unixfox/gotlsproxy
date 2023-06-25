@@ -43,7 +43,7 @@ func hello(w http.ResponseWriter, req *http.Request) {
 	do_req, _ := http.NewRequest(req.Method, fmt.Sprintf("%s", req.URL), req.Body)
 
 	do_req.Header = req.Header
-	do_req.Header.Set("accept-encoding", "gzip, deflate, br")
+	do_req.Header.Del("Accept-Encoding")
 	do_req.Header.Del("connection")
 
 	response, err := client.Do(do_req)
