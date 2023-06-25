@@ -33,6 +33,7 @@ func hello(w http.ResponseWriter, req *http.Request) {
 	req.URL.Scheme = "https"
 
 	m, _ := mimic.Chromium(mimic.BrandChrome, latestVersion)
+	ua := fmt.Sprintf("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/%s Safari/537.36", m.Version())
 
 	client := &http.Client{
 		Transport: m.ConfigureTransport(&http.Transport{
@@ -45,6 +46,8 @@ func hello(w http.ResponseWriter, req *http.Request) {
 	do_req.Header = req.Header
 	do_req.Header.Del("Accept-Encoding")
 	do_req.Header.Del("connection")
+	do_req.Header.Del("user-agent")
+	do_req.Header.Set("user-agent", ua)
 
 	response, err := client.Do(do_req)
 
