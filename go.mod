@@ -3,7 +3,6 @@ module github.com/unixfox/gotlsproxy
 go 1.19
 
 require (
-	github.com/google/brotli/go/cbrotli v0.0.0-20230622092908-50ebce107f5b
 	github.com/saucesteals/fhttp v0.0.0-20221106032530-a77df0f55ed9
 	github.com/saucesteals/mimic v0.0.0-20230215040034-24f697bf8213
 )

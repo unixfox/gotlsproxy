@@ -8,7 +8,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/google/brotli/go/cbrotli"
 	http "github.com/saucesteals/fhttp"
 	"github.com/saucesteals/mimic"
 )
@@ -69,29 +68,15 @@ func hello(w http.ResponseWriter, req *http.Request) {
 		w.Header().Add(name, strings.Join(h, " "))
 	}
 
-	if strings.Contains(response.Header.Get("Content-Encoding"), "br") {
+	w.Header().Del("Content-Encoding")
 
-		w.Header().Del("Content-Encoding")
-		w.WriteHeader(response.StatusCode)
+	w.WriteHeader(response.StatusCode)
 
-		brotliReader := cbrotli.NewReader(response.Body)
-		defer brotliReader.Close()
+	response_body, err := io.ReadAll(response.Body)
 
-		response_body, err := io.ReadAll(response.Body)
-
-		_, err = w.Write(response_body)
-		if err != nil {
-			log.Printf("ERROR Proxy2Client: %v", err)
-		}
-	} else {
-		w.WriteHeader(response.StatusCode)
-
-		response_body, err := io.ReadAll(response.Body)
-
-		_, err = w.Write(response_body)
-		if err != nil {
-			log.Printf("ERROR Proxy2Client: %v", err)
-		}
+	_, err = w.Write(response_body)
+	if err != nil {
+		log.Printf("ERROR Proxy2Client: %v", err)
 	}
 
 }
