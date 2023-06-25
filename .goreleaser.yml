@@ -6,9 +6,7 @@ builds:
 - env:
   - CGO_ENABLED=0
   goos:
-    - windows
     - linux
-    - darwin
   goarch:
     - amd64
     - arm
@@ -16,10 +14,6 @@ builds:
 
   goarm:
     - '7'
-
-  ignore:
-    - goos: windows
-      goarch: 'arm'
 
   binary: '{{ .ProjectName }}'
 
