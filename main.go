@@ -8,6 +8,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/google/brotli/go/cbrotli"
 	http "github.com/saucesteals/fhttp"
 	"github.com/saucesteals/mimic"
 )
@@ -43,7 +44,8 @@ func hello(w http.ResponseWriter, req *http.Request) {
 	do_req, _ := http.NewRequest(req.Method, fmt.Sprintf("%s", req.URL), req.Body)
 
 	do_req.Header = req.Header
-	do_req.Header.Del("Connection")
+	do_req.Header.Set("accept-encoding", "gzip, deflate, br")
+	do_req.Header.Del("connection")
 
 	response, err := client.Do(do_req)
 
@@ -66,14 +68,32 @@ func hello(w http.ResponseWriter, req *http.Request) {
 	for name, h := range response.Header {
 		w.Header().Add(name, strings.Join(h, " "))
 	}
-	w.WriteHeader(response.StatusCode)
 
-	response_body, err := io.ReadAll(response.Body)
+	if strings.Contains(response.Header.Get("Content-Encoding"), "br") {
 
-	_, err = w.Write(response_body)
-	if err != nil {
-		log.Printf("ERROR Proxy2Client: %v", err)
+		w.Header().Del("Content-Encoding")
+		w.WriteHeader(response.StatusCode)
+
+		brotliReader := cbrotli.NewReader(response.Body)
+		defer brotliReader.Close()
+
+		response_body, err := io.ReadAll(response.Body)
+
+		_, err = w.Write(response_body)
+		if err != nil {
+			log.Printf("ERROR Proxy2Client: %v", err)
+		}
+	} else {
+		w.WriteHeader(response.StatusCode)
+
+		response_body, err := io.ReadAll(response.Body)
+
+		_, err = w.Write(response_body)
+		if err != nil {
+			log.Printf("ERROR Proxy2Client: %v", err)
+		}
 	}
+
 }
 
 func main() {
